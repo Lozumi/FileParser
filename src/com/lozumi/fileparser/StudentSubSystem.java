@@ -30,9 +30,12 @@ public class StudentSubSystem {
 
     private void loadStudents() throws DocumentException, IOException, ParseException, InvocationTargetException, InstantiationException, IllegalAccessException {
         undergraduateStudents = new FileLoader("us.txt", 1).getStudentInfoList();
+        studentInfoList.clear();
         studentInfoList.addAll(undergraduateStudents);
+
         graduateStudents = new FileLoader("gs.json", 2).getStudentInfoList();
         studentInfoList.addAll(graduateStudents);
+
         doctoralStudents = new FileLoader("ds.xml", 3).getStudentInfoList();
         studentInfoList.addAll(doctoralStudents);
 
@@ -89,35 +92,46 @@ public class StudentSubSystem {
                 stdErr.println("操作被中断");
             } catch (ParseException e) {
                 throw new RuntimeException(e);
+            } catch (DocumentException e) {
+                throw new RuntimeException(e);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e);
+            } catch (InstantiationException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
             }
         }
     }
 
-    private void createDoctoralStudent() throws ParseException, IOException {
+    private void createDoctoralStudent() throws ParseException, IOException, DocumentException, InvocationTargetException, InstantiationException, IllegalAccessException {
         stdErr.println("请输入博士生信息，格式：学号 姓名 性别 生日（格式：yyyy年MM月dd日） 学院 专业 导师 研究生方向");
         String[] in = stdIn.readLine().split(" ");
         Date birthday = parseDate(in[3]);
         doctoralStudents.add(new DoctoralStudent(in[0], in[1], in[2].charAt(0), birthday, in[4], in[5], in[6], in[7]));
         doctoralStudentObserver.update("ds.xml", new DoctoralStudentParserParser(), doctoralStudents);
+        loadStudents();  // 刷新学生信息
     }
 
-    private void createGraduateStudent() throws IOException, ParseException {
+    private void createGraduateStudent() throws IOException, ParseException, DocumentException, InvocationTargetException, InstantiationException, IllegalAccessException {
         stdErr.println("请输入研究生信息，格式：学号 姓名 性别 生日（格式：yyyy年MM月dd日） 学院 专业 导师");
         String[] in = stdIn.readLine().split(" ");
         Date birthday = parseDate(in[3]);
         graduateStudents.add(new GraduateStudent(in[0], in[1], in[2].charAt(0), birthday, in[4], in[5], in[6]));
         graduateStudentObserver.update("gs.json", new GraduateStudentParserParser(), graduateStudents);
+        loadStudents();  // 刷新学生信息
     }
 
-    private void createUndergraduateStudent() throws IOException, ParseException {
+    private void createUndergraduateStudent() throws IOException, ParseException, DocumentException, InvocationTargetException, InstantiationException, IllegalAccessException {
         stdErr.println("请输入本科生信息，格式：学号 姓名 性别 生日（格式：yyyy年MM月dd日） 学院 专业 辅导员");
         String[] in = stdIn.readLine().split(" ");
         Date birthday = parseDate(in[3]);
         undergraduateStudents.add(new UndergraduateStudent(in[0], in[1], in[2].charAt(0), birthday, in[4], in[5], in[6]));
         undergraduateStudentObserver.update("us.txt", new UndergraduateStudentParser(), undergraduateStudents);
+        loadStudents();  // 刷新学生信息
     }
 
-    private void studentSort() throws IOException {
+    private void studentSort() throws IOException, DocumentException, ParseException, InvocationTargetException, InstantiationException, IllegalAccessException {
         undergraduateStudents.sort(Comparator.comparing(StudentInfo::getBirthday));
         graduateStudents.sort(Comparator.comparing(StudentInfo::getBirthday));
         doctoralStudents.sort(Comparator.comparing(StudentInfo::getBirthday));
@@ -126,6 +140,7 @@ public class StudentSubSystem {
         graduateStudentObserver.update("gs.json", new GraduateStudentParserParser(), graduateStudents);
         doctoralStudentObserver.update("ds.xml", new DoctoralStudentParserParser(), doctoralStudents);
 
+        loadStudents();  // 刷新学生信息
         showAllStudentsInfos();
     }
 
@@ -147,7 +162,7 @@ public class StudentSubSystem {
                     found = true;
                 }
             } catch (Exception e) {
-                stdErr.println("Error processing student information: " + e.getMessage());
+                stdErr.println("错误信息: " + e.getMessage());
             }
         }
 

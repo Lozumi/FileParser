@@ -11,16 +11,13 @@ public class Observer {
 
     public Observer(List<StudentInfo> studentInfoList, String fileName) throws IOException {
         this.studentInfoList = studentInfoList;
-        this.output = new PrintWriter(new FileWriter(fileName, true));
+        output = new PrintWriter(new FileWriter(fileName, true), true);  // 设置为自动刷新
     }
 
-    public void update(String fileName, StudentInfoParser studentInfoParser, List<StudentInfo> studentInfoList) {
-        try (PrintWriter stringWriter = new PrintWriter(new FileWriter(fileName))) {
-            stringWriter.print(studentInfoParser.parseString(studentInfoList));
-        } catch (IOException e) {
-            // 处理异常，这里可以根据实际情况选择记录日志或者抛出运行时异常
-            e.printStackTrace();
-        }
+    public void update(String fileName, StudentInfoParser studentInfoParser, List<StudentInfo> studentInfoList) throws IOException {
+        PrintWriter stringWriter = new PrintWriter(new FileWriter(fileName));
+        stringWriter.print(studentInfoParser.parseString(studentInfoList));
+        stringWriter.close();
     }
 
     // 如果需要，在适当的时候关闭 PrintWriter

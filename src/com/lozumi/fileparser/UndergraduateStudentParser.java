@@ -32,7 +32,9 @@ public class UndergraduateStudentParser implements StudentInfoParser {
     public String parseString(List<StudentInfo> studentInfoList) {
         StringBuilder sb = new StringBuilder();
         for (StudentInfo studentInfo : studentInfoList) {
-            sb.append(studentInfo.toString());
+            if (studentInfo instanceof UndergraduateStudent) {
+                sb.append(studentInfo.toString()).append("\n");
+            }
         }
         return sb.toString();
     }
