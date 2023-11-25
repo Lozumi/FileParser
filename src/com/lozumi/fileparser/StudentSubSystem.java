@@ -78,7 +78,7 @@ public class StudentSubSystem {
      * @throws InstantiationException    如果实例化异常
      * @throws IllegalAccessException    如果访问权限异常
      */
-    public static void main(String[] args) throws IOException, DocumentException, ParseException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public static void main(String[] args) throws IOException, DocumentException, ParseException, InvocationTargetException, InstantiationException, IllegalAccessException, InterruptedException {
         StudentSubSystem studentSubSystem = new StudentSubSystem();
         studentSubSystem.run();
     }
