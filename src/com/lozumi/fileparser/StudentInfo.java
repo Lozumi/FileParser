@@ -1,4 +1,4 @@
-package cn.edu.nwpu.soft;
+package com.lozumi.fileparser;
 
 import java.util.Date;
 
@@ -12,18 +12,18 @@ import com.alibaba.fastjson2.annotation.JSONField;
 public abstract class StudentInfo {
 	private String studentNumber;
 	private String studentName;
-	private char gander;
+	private char gender;
 	@JSONField(format="yyyy年MM月dd日")
 	private Date birthday;
 	private String academy;
 	private String major;
 	
-	public StudentInfo(String studentNumber, String studentName, char gander, Date birthday, String academy,
-			String major) {
+	public StudentInfo(String studentNumber, String studentName, char gender, Date birthday, String academy,
+					   String major) {
 		super();
 		this.studentNumber = studentNumber;
 		this.studentName = studentName;
-		this.gander = gander;
+		this.gender = gender;
 		this.birthday = birthday;
 		this.academy = academy;
 		this.major = major;
@@ -49,12 +49,12 @@ public abstract class StudentInfo {
 		this.studentName = studentName;
 	}
 
-	public char getGander() {
-		return gander;
+	public char getGender() {
+		return gender;
 	}
 
-	public void setGander(char gander) {
-		this.gander = gander;
+	public void setGender(char gender) {
+		this.gender = gender;
 	}
 
 	public Date getBirthday() {

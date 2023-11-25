@@ -1,72 +1,58 @@
-package cn.edu.nwpu.soft;
+package com.lozumi.fileparser;
 
 import com.alibaba.fastjson2.JSON;
 import org.dom4j.DocumentException;
 
-import javax.print.Doc;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-
 public class StudentSubSystem {
+
     private static BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
     private static PrintWriter stdOut = new PrintWriter(System.out, true);
     private static PrintWriter stdErr = new PrintWriter(System.err, true);
 
-    private List<StudentInfo> studentInfos;
+    private List<StudentInfo> studentInfoList;
     private List<StudentInfo> undergraduateStudents;
     private List<StudentInfo> graduateStudents;
     private List<StudentInfo> doctoralStudents;
     private Observer undergraduateStudentObserver;
     private Observer graduateStudentObserver;
-    private Observer doctoralStudentObservser;
+    private Observer doctoralStudentObserver;
 
     private StudentSubSystem() throws DocumentException, IOException, ParseException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        studentInfos = new ArrayList<>();
+        studentInfoList = new ArrayList<>();
         loadStudents();
-
     }
 
     private void loadStudents() throws DocumentException, IOException, ParseException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        undergraduateStudents = new FileLoad("us.txt", 1).getStudentInfos();
-        studentInfos.addAll(undergraduateStudents);
-        graduateStudents = new FileLoad("gs.json", 2).getStudentInfos();
-        studentInfos.addAll(graduateStudents);
-        doctoralStudents = new FileLoad("ds.xml", 3).getStudentInfos();
-        studentInfos.addAll(doctoralStudents);
+        undergraduateStudents = new FileLoader("us.txt", 1).getStudentInfoList();
+        studentInfoList.addAll(undergraduateStudents);
+        graduateStudents = new FileLoader("gs.json", 2).getStudentInfoList();
+        studentInfoList.addAll(graduateStudents);
+        doctoralStudents = new FileLoader("ds.xml", 3).getStudentInfoList();
+        studentInfoList.addAll(doctoralStudents);
 
         undergraduateStudentObserver = new Observer(undergraduateStudents, "us.txt");
-        graduateStudentObserver = new Observer(graduateStudents,"gs.json");
-        doctoralStudentObservser = new Observer(doctoralStudents,"ds.xml");
+        graduateStudentObserver = new Observer(graduateStudents, "gs.json");
+        doctoralStudentObserver = new Observer(doctoralStudents, "ds.xml");
     }
 
-    /**
-     * Starts the application
-     *
-     * @param args 传入系统的初始值
-     * @throws IOException 抛出错误
-     */
     public static void main(String[] args) throws IOException, DocumentException, ParseException, InvocationTargetException, InstantiationException, IllegalAccessException {
         StudentSubSystem studentSubSystem = new StudentSubSystem();
         studentSubSystem.run();
     }
 
-    /**
-     * Present the user with a menu of options and execute the selected task
-     *
-     * @throws IOException 当有IOException异常时，抛出异常
-     */
     private void run() throws IOException {
-        // TODO:
-        while (true){
-            try{
+        while (true) {
+            try {
                 String choice = getChoice();
-                switch (choice){
+                switch (choice) {
                     case "A":
-                        showAllStudentInfos();
+                        showAllStudentsInfos();
                         break;
                     case "B":
                         createUndergraduateStudent();
@@ -92,18 +78,14 @@ public class StudentSubSystem {
                         break;
                     case "H":
                         return;
-
                     default:
                         stdErr.println("请输入正确选项字母");
                         break;
                 }
                 Thread.sleep(400);
-                // 暂停一会以防止菜单错位
-
-
-            }catch (IOException e){
+            } catch (IOException e) {
                 stdErr.println(e.getMessage());
-            }catch (InterruptedException e){
+            } catch (InterruptedException e) {
                 stdErr.println("操作被中断");
             } catch (ParseException e) {
                 throw new RuntimeException(e);
@@ -114,110 +96,116 @@ public class StudentSubSystem {
     private void createDoctoralStudent() throws ParseException, IOException {
         stdErr.println("请输入博士生信息，格式：学号 姓名 性别 生日（格式：yyyy年MM月dd日） 学院 专业 导师 研究生方向");
         String[] in = stdIn.readLine().split(" ");
-        Date birthday = null;
-        {
-            String dateString = in[3];
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-            birthday = sdf.parse(dateString);
-        }
-        doctoralStudents.add(new DoctoralStudent(in[0],in[1],in[2].charAt(0),birthday,in[4],in[5],in[6],in[7]));
-        doctoralStudentObservser.update("ds.xml", new ParseDoctoralStudent(), doctoralStudents);
+        Date birthday = parseDate(in[3]);
+        doctoralStudents.add(new DoctoralStudent(in[0], in[1], in[2].charAt(0), birthday, in[4], in[5], in[6], in[7]));
+        doctoralStudentObserver.update("ds.xml", new DoctoralStudentParserParser(), doctoralStudents);
     }
 
     private void createGraduateStudent() throws IOException, ParseException {
         stdErr.println("请输入研究生信息，格式：学号 姓名 性别 生日（格式：yyyy年MM月dd日） 学院 专业 导师");
         String[] in = stdIn.readLine().split(" ");
-        Date birthday = null;
-        {
-            String dateString = in[3];
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-            birthday = sdf.parse(dateString);
-        }
-        graduateStudents.add(new GraduateStudent(in[0],in[1],in[2].charAt(0),birthday,in[4],in[5],in[6]));
-        graduateStudentObserver.update("gs.json",new ParseGraduateStudent(), graduateStudents);
+        Date birthday = parseDate(in[3]);
+        graduateStudents.add(new GraduateStudent(in[0], in[1], in[2].charAt(0), birthday, in[4], in[5], in[6]));
+        graduateStudentObserver.update("gs.json", new GraduateStudentParserParser(), graduateStudents);
     }
 
     private void createUndergraduateStudent() throws IOException, ParseException {
         stdErr.println("请输入本科生信息，格式：学号 姓名 性别 生日（格式：yyyy年MM月dd日） 学院 专业 辅导员");
         String[] in = stdIn.readLine().split(" ");
-        Date birthday = null;
-        {
-            String dateString = in[3];
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-            birthday = sdf.parse(dateString);
-        }
-        undergraduateStudents.add(new UndergraduateStudent(in[0],in[1],in[2].charAt(0),birthday,in[4],in[5],in[6]));
-        undergraduateStudentObserver.update("us.txt", new ParseUndergraduateStudent(), undergraduateStudents);
+        Date birthday = parseDate(in[3]);
+        undergraduateStudents.add(new UndergraduateStudent(in[0], in[1], in[2].charAt(0), birthday, in[4], in[5], in[6]));
+        undergraduateStudentObserver.update("us.txt", new UndergraduateStudentParser(), undergraduateStudents);
     }
 
-    /**按本科生、研究生、博士生的顺序，每类学生再按年龄从小到大进行排序，并按存储格式打印各学生信息
-     *
-     */
     private void studentSort() throws IOException {
         undergraduateStudents.sort(Comparator.comparing(StudentInfo::getBirthday));
         graduateStudents.sort(Comparator.comparing(StudentInfo::getBirthday));
         doctoralStudents.sort(Comparator.comparing(StudentInfo::getBirthday));
 
-        undergraduateStudentObserver.update("us.txt", new ParseUndergraduateStudent(), undergraduateStudents);
-        graduateStudentObserver.update("gs.json",new ParseGraduateStudent(), graduateStudents);
-        doctoralStudentObservser.update("ds.xml", new ParseDoctoralStudent(), doctoralStudents);
+        undergraduateStudentObserver.update("us.txt", new UndergraduateStudentParser(), undergraduateStudents);
+        graduateStudentObserver.update("gs.json", new GraduateStudentParserParser(), graduateStudents);
+        doctoralStudentObserver.update("ds.xml", new DoctoralStudentParserParser(), doctoralStudents);
 
-        showAllStudentInfos();
+        showAllStudentsInfos();
     }
 
     private void findStudentByName(String name) {
-        for(StudentInfo studentInfo:studentInfos) {
-            if (studentInfo.getStudentName().equals(name)){
-                String out = "";
-                if(studentInfo instanceof UndergraduateStudent){
-                    out = studentInfo.toString();
-                } else if (studentInfo instanceof GraduateStudent) {
-                    out = JSON.toJSONString(studentInfo);
-                } else if (studentInfo instanceof DoctoralStudent) {
-                    DoctoralStudent doctoralStudent = (DoctoralStudent) studentInfo;
-                    out = ParseDoctoralStudent.objectToXml(doctoralStudent);
+        boolean found = false;
+        for (StudentInfo studentInfo : studentInfoList) {
+            try {
+                if (studentInfo.getStudentName().equals(name)) {
+                    String out = "";
+                    if (studentInfo instanceof UndergraduateStudent) {
+                        out = studentInfo.toString();
+                    } else if (studentInfo instanceof GraduateStudent) {
+                        out = JSON.toJSONString(studentInfo);
+                    } else if (studentInfo instanceof DoctoralStudent) {
+                        DoctoralStudent doctoralStudent = (DoctoralStudent) studentInfo;
+                        out = DoctoralStudentParserParser.objectToXml(doctoralStudent);
+                    }
+                    stdOut.println(out);
+                    found = true;
                 }
-                stdOut.println(out);
+            } catch (Exception e) {
+                stdErr.println("Error processing student information: " + e.getMessage());
             }
+        }
+
+        if (!found) {
+            stdOut.println("未找到该姓名的学生！");
         }
     }
 
     private void findStudentByID(String id) {
-        for(StudentInfo studentInfo:studentInfos){
-            if(studentInfo.getStudentNumber().equals(id)){
+        for (StudentInfo studentInfo : studentInfoList) {
+            if (studentInfo.getStudentNumber().equals(id)) {
                 String out = "";
-                if(studentInfo instanceof UndergraduateStudent){
+                if (studentInfo instanceof UndergraduateStudent) {
                     out = studentInfo.toString();
                 } else if (studentInfo instanceof GraduateStudent) {
                     out = JSON.toJSONString(studentInfo);
                 } else if (studentInfo instanceof DoctoralStudent) {
                     DoctoralStudent doctoralStudent = (DoctoralStudent) studentInfo;
-                    out = ParseDoctoralStudent.objectToXml(doctoralStudent);
+                    out = DoctoralStudentParserParser.objectToXml(doctoralStudent);
                 }
                 stdOut.println(out);
+                return;  // 找到匹配的学生后，直接返回，避免继续循环
+            }
+        }
+        stdErr.println("未找到学号为 " + id + " 的学生信息");
+    }
+
+    private void showAllStudentsInfos() {
+        for (StudentInfo studentInfo : studentInfoList) {
+            if (studentInfo instanceof UndergraduateStudent) {
+                formatAndPrintUndergraduate((UndergraduateStudent) studentInfo);
+            } else if (studentInfo instanceof GraduateStudent) {
+                formatAndPrintGraduate((GraduateStudent) studentInfo);
+            } else if (studentInfo instanceof DoctoralStudent) {
+                formatAndPrintDoctoral((DoctoralStudent) studentInfo);
             }
         }
     }
 
-    private void showAllStudentInfos() throws IOException {
-        for(String filePath:new String[]{"us.txt", "gs.json", "ds.xml"}) {
-            BufferedReader reader = new BufferedReader(new FileReader(filePath));
-            String line = reader.readLine();
-            while (line!=null){
-                stdOut.println(line);
-                line = reader.readLine();
-            }
-            stdOut.flush();
-        }
+    private void formatAndPrintUndergraduate(UndergraduateStudent undergraduateStudent) {
+        //stdOut.println("========== Undergraduate Student Info ==========");
+        stdOut.println(undergraduateStudent.toString());
+        //stdOut.println("=============================================");
+    }
+
+    private void formatAndPrintGraduate(GraduateStudent graduateStudent) {
+        //stdOut.println("========== Graduate Student Info ==========");
+        stdOut.println(JSON.toJSONString(graduateStudent));
+        //stdOut.println("==========================================");
+    }
+
+    private void formatAndPrintDoctoral(DoctoralStudent doctoralStudent) {
+        //stdOut.println("========== Doctoral Student Info ==========");
+        stdOut.println(DoctoralStudentParserParser.objectToXml(doctoralStudent));
+        //stdOut.println("=========================================");
     }
 
 
-    /**
-     * Display a menu of options and verifies the user's choice
-     *
-     * @return 返回了用户的选项代码
-     * @throws IOException 抛出异常
-     */
     private String getChoice() throws IOException {
         String input = null;
         try {
@@ -237,5 +225,10 @@ public class StudentSubSystem {
             stdErr.println(nfe);
         }
         return input;
+    }
+
+    private Date parseDate(String dateString) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日");
+        return simpleDateFormat.parse(dateString);
     }
 }

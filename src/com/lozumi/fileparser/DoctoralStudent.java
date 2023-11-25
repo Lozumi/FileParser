@@ -1,18 +1,15 @@
-package cn.edu.nwpu.soft;
+package com.lozumi.fileparser;
 
 import java.util.Date;
 
 public class DoctoralStudent extends StudentInfo{
+    private String supervisor;
+    private String researchFields;
+
     public DoctoralStudent(String studentNumber, String studentName, char gander, Date birthday, String academy, String major, String supervisor, String researchFields) {
         super(studentNumber, studentName, gander, birthday, academy, major);
         this.supervisor = supervisor;
         this.researchFields = researchFields;
-    }
-    private String supervisor;
-    private String researchFields;
-
-    public DoctoralStudent() {
-        super();
     }
 
     public String getSupervisor(){

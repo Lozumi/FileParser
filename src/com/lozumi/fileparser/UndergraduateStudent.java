@@ -1,4 +1,4 @@
-package cn.edu.nwpu.soft;
+package com.lozumi.fileparser;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -16,7 +16,7 @@ public class UndergraduateStudent extends StudentInfo{
 
     @Override
     public String toString(){
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日");
-        return getStudentNumber()+'_'+getStudentName()+'_'+getGander()+'_'+sdf.format(getBirthday())+'_'+getAcademy()+'_'+getMajor()+'_'+getTutor()+"\n";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日");
+        return getStudentNumber()+'_'+getStudentName()+'_'+ getGender()+'_'+simpleDateFormat.format(getBirthday())+'_'+getAcademy()+'_'+getMajor()+'_'+getTutor();
     }
 }
