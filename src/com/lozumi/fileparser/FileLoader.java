@@ -4,6 +4,9 @@ import java.io.*;
 import java.text.ParseException;
 import java.util.List;
 
+/**
+ * 文件加载器类，用于从文件中读取学生信息并进行解析。
+ */
 public class FileLoader {
     // standard io streams
     BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
@@ -12,6 +15,12 @@ public class FileLoader {
 
     private List<StudentInfo> studentInfoList;
 
+    /**
+     * 构造函数，根据文件类型加载相应类型的学生信息。
+     *
+     * @param filePath 文件路径
+     * @param type     文件类型，1表示本科生文件，2表示研究生文件，3表示博士生文件
+     */
     public FileLoader(String filePath, int type) {
         try {
             String fileContent = readFile(filePath);
@@ -29,13 +38,13 @@ public class FileLoader {
                 default:
                     break;
             }
-        } catch (IOException | ParseException e){
+        } catch (IOException | ParseException e) {
             stdErr.println("Error loading file: " + e.getMessage());
         }
     }
 
     /**
-     * 从文件中读取内容
+     * 从文件中读取内容。
      *
      * @param filePath 文件路径
      * @return 文件中数据
@@ -55,9 +64,8 @@ public class FileLoader {
         return sb.toString();
     }
 
-
     /**
-     * 返回学生信息列表
+     * 返回学生信息列表。
      *
      * @return 学生信息列表
      */
